@@ -111,15 +111,18 @@ namespace Md2ChatToGd
 
                 if (t.StartsWith("|"))
                 {
+                    // todo: пока что реализуем таблицу через плашу code
+                    //       потому что chatgpt строит таблицу через asci 
                     if (!inTable)
                     {
                         inTable = true;
+                        b.AppendLine("code");
                     }
                     t = t.Substring(1);
                 }
                 else if (inTable)
                 {
-                    b.AppendLine("[/table]");
+                    b.AppendLine("[/code]");
                     inTable = false;
                 }
 
