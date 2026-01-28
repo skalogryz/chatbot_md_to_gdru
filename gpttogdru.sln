@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Md2ChatToGd", "Md2ChatToGd\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatBotMdToGdRu", "ChatBotMdToGdRu\ChatBotMdToGdRu.csproj", "{B2E178E6-D331-4541-9EDD-66E6F5616454}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{9D101D48-3D4F-4890-B113-14ADD2AE0B39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B2E178E6-D331-4541-9EDD-66E6F5616454}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2E178E6-D331-4541-9EDD-66E6F5616454}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2E178E6-D331-4541-9EDD-66E6F5616454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D101D48-3D4F-4890-B113-14ADD2AE0B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D101D48-3D4F-4890-B113-14ADD2AE0B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D101D48-3D4F-4890-B113-14ADD2AE0B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D101D48-3D4F-4890-B113-14ADD2AE0B39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

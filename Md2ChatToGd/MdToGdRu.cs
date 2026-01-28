@@ -56,8 +56,30 @@ namespace Md2ChatToGd
             return "";
         }
 
+        public static bool IsHeaderStart(string s, out string actualText)
+        {
+            actualText = "";
+            bool result = true;
+            if (s.StartsWith("##### "))
+                actualText = s.Substring(6, s.Length - 6);
+            else if (s.StartsWith("#### "))
+                actualText = s.Substring(5, s.Length - 5);
+            else if (s.StartsWith("### "))
+                actualText = s.Substring(4, s.Length - 4);
+            else if (s.StartsWith("## "))
+                actualText = s.Substring(3, s.Length - 3);
+            else if (s.StartsWith("# "))
+                actualText = s.Substring(2, s.Length - 2);
+            else
+                result = false;
+            return result;
+        }
+
         public static string Convert(string text)
         {
+            if (string.IsNullOrWhiteSpace(text))
+                return "";
+
             string[] lines = text.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             bool inQuote = false;
@@ -138,16 +160,10 @@ namespace Md2ChatToGd
                 {
                     inFormula = true;
                 }
-                else if (t.StartsWith("###"))
+                else if (IsHeaderStart(t, out var hdrText)) 
                 {
                     b.Append("[b]");
-                    b.Append(t, 3, t.Length - 3);
-                    b.Append("[/b]");
-                }
-                else if (t.StartsWith("##"))
-                {
-                    b.Append("[b]");
-                    b.Append(t, 2, t.Length - 2);
+                    b.Append(hdrText);
                     b.Append("[/b]");
                 }
                 else if (!string.IsNullOrEmpty(codest) && !inCode)
