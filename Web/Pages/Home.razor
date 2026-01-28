@@ -1,0 +1,71 @@
+﻿@page "/"
+@using Microsoft.JSInterop;
+@using Md2ChatToGd;
+@inject IJSRuntime js;
+<div class="h-100">
+    <PageTitle>Markdown в gd.ru</PageTitle>
+    <EditForm Model=this class="h-75">
+        <div class="row">
+            <div class="col">1) Вставляем markdown от нейросейтки сюда:</div>
+            <div class="col"><InputCheckbox id="chkAuto" @bind-Value=ConvertRealTime></InputCheckbox> <label>конвертация при вводе</label></div>
+        </div>
+        <div class="row w-100 h-50">
+            <InputTextArea @bind-Value=InputText class="codearea" @oninput=SomeInput />
+        </div>
+    <div class="row py-1">
+            <div class="col">
+                2) Нажимаем ->
+                <button @onclick=DoConvertInput class="btn  btn-secondary">Конвертировать</button>
+            </div>
+            <div class="col">
+                3) Нажимаем ->
+                <button @onclick=DoCopy class="btn btn-primary">Копировать</button>
+            </div>
+        </div>
+        <div class="row w-100 h-50">
+    <InputTextArea @bind-Value=OutputText class="codearea" />
+    </div>
+</EditForm>
+</div>
+@code
+{
+    public bool ConvertRealTime { get; set; } = true;
+
+    public string input = "";
+    public string InputText
+    {
+        get { return input; }
+        set
+        {
+            input = value;
+            DoConvert(input);
+        }
+    }
+
+    public string OutputText { get; set; } = "";
+
+    public void DoConvert(string inp)
+    {
+        if (inp == null) return;
+        OutputText = MdToGdRu.Convert(inp);
+    }
+
+    public void DoConvertInput()
+    {
+        OutputText = MdToGdRu.Convert(InputText);
+    }
+
+    public void DoCopy()
+    {
+        js.InvokeVoidAsync("navigator.clipboard.writeText", OutputText);
+    }
+
+    public void SomeInput(ChangeEventArgs arg)
+    {
+        if (!ConvertRealTime) return;
+        if (arg == null) return;
+        if (arg.Value == null) return;
+        DoConvert(arg.Value.ToString());
+    }
+
+}
