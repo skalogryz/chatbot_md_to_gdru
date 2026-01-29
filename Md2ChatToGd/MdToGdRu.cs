@@ -177,7 +177,8 @@ namespace Md2ChatToGd
             }
             b.Append("&bull;");
             i += 2;
-            b.Append(r, i, r.Length - i);
+            if (i < r.Length)
+                b.Append(r, i, r.Length - i);
             return b.ToString();
         }
 
@@ -198,7 +199,8 @@ namespace Md2ChatToGd
             for (int k = 0; k < cnt; k ++)b.Append("<ul>");
             b.Append("<li>");
             i += 2;
-            b.Append(r, i, r.Length - i);
+            if (i < r.Length)
+                b.Append(r, i, r.Length - i);
             b.Append("</li>");
             for (int k = 0; k < cnt; k++) b.Append("</ul>");
             return b.ToString();
