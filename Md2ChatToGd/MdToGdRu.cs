@@ -13,13 +13,96 @@ namespace Md2ChatToGd
             ["javascript"] = "js",
             ["pascal"] = "pas"
         };
+
+        public static bool IsBoldSwitch(string t, int idx)
+        {
+            return ((idx < t.Length - 1) && (t[idx] == '*') && (t[idx + 1] == '*'));
+        }
+        public static bool IsItalicSwitch(string t, int idx)
+        {
+            return (idx < t.Length) && (t[idx] == '*') && (!IsBoldSwitch(t, idx));
+        }
+
+
+        public static bool IsWhiteSpaceOrNone(string t, int idx)
+        {
+            if ((idx >= t.Length) || (idx < 0))
+                return true;
+            return char.IsWhiteSpace(t, idx);
+        }
+
+
+        // Replaces ** and * the line of text
+        // It's important that openning styling starts next to the characters
+        //  correct: **bold
+        //  wrong:   ** bold
+        // and the same rules applies to italic:
+        //   correct: *italic
+        //   wrong:   * italic
+        // This allow to destiguish between the formatting and bullet lists:
+        //  * item 1
+        //  * item 2
+        //  * *italic item* 3
         public static string ReplaceMarkup(string t)
         {
             int j = 0;
             int i = 0;
             StringBuilder b = new StringBuilder();
             j = 0;
-            bool isOpen = false;
+
+            bool isBoldOpen = false;
+            bool isItalicOpen = false;
+
+            while (i < t.Length)
+            {
+                if (t[i] == '*')
+                {
+                    int nx = i + 2;
+                    bool bsw = IsBoldSwitch(t, i);
+                    bool isw = false;
+                    if (!bsw)
+                    {
+                        isw = IsItalicSwitch(t, i);
+                        if (isw)
+                            nx = i + 1;
+                    }
+
+                    string app = "";
+                    if (bsw && !isBoldOpen && !IsWhiteSpaceOrNone(t, i + 2))
+                    {
+                        app = "[b]";
+                        isBoldOpen = true;
+                    }
+                    else if (bsw && isBoldOpen && !IsWhiteSpaceOrNone(t, i - 1))
+                    {
+                        app = "[b]";
+                        isBoldOpen = false;
+                    }
+                    else if (isw && !isItalicOpen && !IsWhiteSpaceOrNone(t, i + 1))
+                    {
+                        app = "[i]";
+                        isItalicOpen = true;
+                    }
+                    else if (isw && isItalicOpen && !IsWhiteSpaceOrNone(t, i - 1))
+                    {
+                        app = "[/i]";
+                        isItalicOpen = false;
+                    }
+                    if (!string.IsNullOrEmpty(app))
+                    {
+                        b.Append(t, j, i - j);
+                        b.Append(app);
+                        i = nx;
+                        j = i;
+                    }
+                    else
+                        i++;
+                }
+                else
+                    i++;
+            }
+
+            /*bool isOpen = false;
             i = t.IndexOf("**");
             if (i < 0) 
                 return t;
@@ -35,7 +118,7 @@ namespace Md2ChatToGd
                 i += 2;
                 j = i;
                 i = t.IndexOf("**", i);
-            }
+            }*/
             if (j < t.Length) b.Append(t, j, t.Length - j);
             return b.ToString();
         }
