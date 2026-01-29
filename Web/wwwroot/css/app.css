@@ -106,5 +106,5 @@ code {
 {
     font-family: monospace;
     font-size: initial;
-    white-space:nowrap
+    white-space: pre;
 }
