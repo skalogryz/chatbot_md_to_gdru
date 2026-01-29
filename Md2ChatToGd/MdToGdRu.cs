@@ -75,6 +75,14 @@ namespace Md2ChatToGd
             return result;
         }
 
+        public static bool IsHorzLine(string s)
+        {
+            if (s == "---") return true;
+            if (s == "___") return true;
+            if (s == "***") return true;
+            return false;
+        }
+
         public static string Convert(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -181,6 +189,12 @@ namespace Md2ChatToGd
                     }
                     b.Append("]");
                     //b.AppendLine(t);
+                }
+                else if (IsHorzLine(t))
+                {
+                    b.AppendLine(); // extra line break
+                    b.Append("<hr>");
+                    b.AppendLine(); // and another extra line break
                 }
                 else
                 {
