@@ -11,7 +11,10 @@ namespace Md2ChatToGd
             ["python"] = "py",
             ["php"] = "php",
             ["javascript"] = "js",
-            ["pascal"] = "pas"
+            ["pascal"] = "pas",
+            ["cpp"] = "cpp",
+            ["c"] = "cpp",
+            ["csharp"] = "csharp",
         };
 
         public static bool IsBoldSwitch(string t, int idx)
