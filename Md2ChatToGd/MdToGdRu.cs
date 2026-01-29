@@ -143,6 +143,64 @@ namespace Md2ChatToGd
                 i = t.IndexOf("**", i);
             }*/
             if (j < t.Length) b.Append(t, j, t.Length - j);
+
+            var r = b.ToString();
+            switch(opt.ReplaceSpaceBull)
+            {
+                case OffsetBullReplace.ItemsList:
+                    r = ReplaceByItemsList(r);
+                    break;
+                case OffsetBullReplace.NbSpBull:
+                    r = ReplaceWhiteSpaceBull(r);
+                    break;
+            }
+            return r;
+        }
+
+        public static string ReplaceWhiteSpaceBull(string r)
+        {
+            if (string.IsNullOrWhiteSpace(r))
+                return r;
+            int i = 0;
+            while ((i < r.Length)&&(Char.IsWhiteSpace(r, i)))
+            {
+                i++;
+            }
+            if (i == 0) return r;
+            if (i >= r.Length) return r;
+            if (r[i] != '*') return r;
+            StringBuilder b = new StringBuilder();
+            while (i > 0)
+            {
+                b.Append("&nbsp;");
+                i--;
+            }
+            b.Append("&bull;");
+            i += 2;
+            b.Append(r, i, r.Length - i);
+            return b.ToString();
+        }
+
+        public static string ReplaceByItemsList(string r)
+        {
+            if (string.IsNullOrWhiteSpace(r))
+                return r;
+            int i = 0;
+            while ((i < r.Length) && (Char.IsWhiteSpace(r, i)))
+            {
+                i++;
+            }
+            if (i == 0) return r;
+            if (i >= r.Length) return r;
+            if (r[i] != '*') return r;
+            StringBuilder b = new StringBuilder();
+            int cnt = i;
+            for (int k = 0; k < cnt; k ++)b.Append("<ul>");
+            b.Append("<li>");
+            i += 2;
+            b.Append(r, i, r.Length - i);
+            b.Append("</li>");
+            for (int k = 0; k < cnt; k++) b.Append("</ul>");
             return b.ToString();
         }
 
