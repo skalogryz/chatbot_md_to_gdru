@@ -46,8 +46,11 @@ namespace Md2ChatToGd
         //  * item 1
         //  * item 2
         //  * *italic item* 3
-        public static string ReplaceMarkup(string t)
+        public static string ReplaceMarkup(string t, ConvertOpt opt = null)
         {
+            if (opt == null)
+                opt = ConvertOpt.Default;
+
             int j = 0;
             int i = 0;
             StringBuilder b = new StringBuilder();
@@ -55,6 +58,7 @@ namespace Md2ChatToGd
 
             bool isBoldOpen = false;
             bool isItalicOpen = false;
+            bool isInlineCode = false;
 
             while (i < t.Length)
             {
@@ -78,7 +82,7 @@ namespace Md2ChatToGd
                     }
                     else if (bsw && isBoldOpen && !IsWhiteSpaceOrNone(t, i - 1))
                     {
-                        app = "[b]";
+                        app = "[/b]";
                         isBoldOpen = false;
                     }
                     else if (isw && !isItalicOpen && !IsWhiteSpaceOrNone(t, i + 1))
@@ -100,6 +104,22 @@ namespace Md2ChatToGd
                     }
                     else
                         i++;
+                }
+                else if ((t[i] == '`') && (!isInlineCode) && !IsWhiteSpaceOrNone(t, i + 1))
+                {
+                    b.Append(t, j, i - j);
+                    b.Append(opt.InlineCodeStart);
+                    isInlineCode = true;
+                    i++;
+                    j = i;
+                }
+                else if ((t[i] == '`') && (isInlineCode) && !IsWhiteSpaceOrNone(t, i - 1))
+                {
+                    b.Append(t, j, i - j);
+                    b.Append(opt.InclineCodeEnd);
+                    isInlineCode = false;
+                    i++;
+                    j = i;
                 }
                 else
                     i++;
@@ -169,10 +189,12 @@ namespace Md2ChatToGd
             return false;
         }
 
-        public static string Convert(string text)
+        public static string Convert(string text, ConvertOpt opt = null)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return "";
+            if (opt == null)
+                opt = ConvertOpt.Default;
 
             string[] lines = text.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
@@ -284,7 +306,7 @@ namespace Md2ChatToGd
                 }
                 else
                 {
-                    t = ReplaceMarkup(t);
+                    t = ReplaceMarkup(t, opt);
                     b.Append(t);
                 }
 
