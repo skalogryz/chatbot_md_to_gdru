@@ -213,6 +213,10 @@ namespace Md2ChatToGd
             return "";
         }
 
+
+        // todo: the whitespace offset can be different on start of the code 
+        //       and the end of the code. but this requires the "language" section
+        //       to be added here
         public static string CodeStart(string text)
         {
             const string code4 = "````";
