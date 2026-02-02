@@ -215,10 +215,27 @@ namespace Md2ChatToGd
 
         public static string CodeStart(string text)
         {
-            if (text.StartsWith("````"))
-                return "````";
-            if (text.StartsWith("```"))
-                return "```";
+            const string code4 = "````";
+            const string code3 = "```";
+
+            // the order is important. The longest goes first
+            string[] codes = new string[] { code4, code3 };
+
+            int i = 0;
+            while ((i < text.Length) && (Char.IsWhiteSpace(text, i)))
+                i++;
+            string pfx = "";
+            if (i > 0) pfx = text.Substring(0, i);
+
+            for (int j = 0; j < codes.Length; j++)
+            {
+                var c = codes[j];
+                if (string.Compare(text, i, c, 0, c.Length) == 0)
+                {
+                    if (pfx == "") return c;
+                    return $"{pfx}{c}";
+                }
+            }
             return "";
         }
 
