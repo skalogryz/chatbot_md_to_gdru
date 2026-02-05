@@ -270,6 +270,29 @@ namespace Md2ChatToGd
             return false;
         }
 
+        public static void SkipWhiteSpace(string s, ref int i)
+        {
+            while ((i < s.Length) && (Char.IsWhiteSpace(s, i)))
+                i++;
+        }
+        public static int SkipWhiteSpace(string s)
+        {
+            int result = 0;
+            SkipWhiteSpace(s, ref result);
+            return result;
+        }
+
+        public static bool IsChatGPTFormulaStart(string s)
+        {
+            int i = SkipWhiteSpace(s);
+            return (i == s.Length - 1) && (s[i] == '[');
+        }
+        public static bool IsChatGPTFormulaEnd(string s)
+        {
+            int i = SkipWhiteSpace(s);
+            return (i == s.Length - 1) && (s[i] == ']');
+        }
+
         public static string Convert(string text, ConvertOpt opt = null)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -304,7 +327,7 @@ namespace Md2ChatToGd
                 }
                 if (inFormula)
                 {
-                    if (t == "]")
+                    if (IsChatGPTFormulaEnd(t))
                     {
                         b.AppendLine("[/cht]");
                         inFormula = false;
@@ -353,9 +376,10 @@ namespace Md2ChatToGd
                     b.Append(t.Substring(2, t.Length - 4));
                     b.Append("[/cht]");
                 }
-                else if (t == "[") // chatgpt forumals
+                else if (IsChatGPTFormulaStart(t)) // chatgpt forumals
                 {
                     inFormula = true;
+                    b.Append("[cht]");
                 }
                 else if (IsHeaderStart(t, out var hdrText)) 
                 {
