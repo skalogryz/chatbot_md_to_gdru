@@ -293,6 +293,12 @@ namespace Md2ChatToGd
             return (i == s.Length - 1) && (s[i] == ']');
         }
 
+        public static bool IsTableLine(string s)
+        {
+            int i = SkipWhiteSpace(s);
+            return ((i >= 0) && (i < s.Length) && (s[i] == '|'));
+        }
+
         public static string Convert(string text, ConvertOpt opt = null)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -308,9 +314,9 @@ namespace Md2ChatToGd
             bool inTable = false;
             bool inFormula = false;
             StringBuilder b = new StringBuilder();
+            List<string> tableLines = new List<string>();
 
-
-            foreach(var l in lines)
+            foreach (var l in lines)
             {
                 string t = l;
                 var codest = CodeStart(t);
@@ -351,21 +357,32 @@ namespace Md2ChatToGd
                     inQuote = false;
                 }
 
-                if (t.StartsWith("|"))
+                if (IsTableLine(t))
                 {
                     // todo: пока что реализуем таблицу через плашу code
                     //       потому что chatgpt строит таблицу через asci 
                     if (!inTable)
                     {
+                        tableLines.Clear();
                         inTable = true;
-                        b.AppendLine("code");
                     }
-                    t = t.Substring(1);
+                    tableLines.Add(t);
+                    continue;
                 }
                 else if (inTable)
                 {
-                    b.AppendLine("[/code]");
                     inTable = false;
+
+                    var tbl = MarkdownTableParser.ParseTable(tableLines);
+                    if (tbl != null)
+                    {
+                        b.Append(MarkdownTableParser.ToHtml(tbl, (string cnt) =>
+                        {
+                            return Convert(cnt, opt);
+                        }));
+                    }
+                    tableLines.Clear();
+                    continue;
                 }
 
 
@@ -417,7 +434,21 @@ namespace Md2ChatToGd
 
                 b.AppendLine();
             }
+
+            if (tableLines.Count > 0)
+            {
+                var tbl = MarkdownTableParser.ParseTable(tableLines);
+                if (tbl != null)
+                {
+                    b.Append(MarkdownTableParser.ToHtml(tbl, (string cnt) =>
+                    {
+                        return Convert(cnt, opt);
+                    }));
+                }
+            }
+
             return b.ToString();
         }
+
     }
 }
