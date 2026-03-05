@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Text;
 
 namespace Md2ChatToGd
@@ -35,6 +36,32 @@ namespace Md2ChatToGd
         }
 
 
+        public static string FindClosingStars(string t, int ofs)
+        {
+            while (ofs < t.Length)
+            {
+                // this is a asterisk next to space: "text *a", we skip it
+                // we only need asterisk after a character "text* a"
+                if (t[ofs] == '*')
+                {
+                    if (Char.IsWhiteSpace(t, ofs - 1))
+                    {
+                        ofs++;
+                    }
+                    else
+                    {
+                        int j = ofs;
+                        while ((ofs < t.Length) && (t[ofs] == '*') && ((ofs - j) < 3))
+                            ofs++;
+                        return t.Substring(j, ofs - j);
+                    }
+                }
+                else
+                    ofs++;
+            }
+            return "";
+        }
+
         // Replaces ** and * the line of text
         // It's important that openning styling starts next to the characters
         //  correct: **bold
@@ -56,8 +83,8 @@ namespace Md2ChatToGd
             StringBuilder b = new StringBuilder();
             j = 0;
 
-            bool isBoldOpen = false;
-            bool isItalicOpen = false;
+            int isBoldOpen = 0;
+            int isItalicOpen = 0;
             bool isInlineCode = false;
 
             while (i < t.Length)
@@ -67,6 +94,7 @@ namespace Md2ChatToGd
                     int nx = i + 2;
                     bool bsw = IsBoldSwitch(t, i);
                     bool isw = false;
+                    bool isTriplet = string.Compare(t, i, "***", 0, 3) == 0;
                     if (!bsw)
                     {
                         isw = IsItalicSwitch(t, i);
@@ -75,25 +103,54 @@ namespace Md2ChatToGd
                     }
 
                     string app = "";
-                    if (bsw && !isBoldOpen && !IsWhiteSpaceOrNone(t, i + 2))
+                    if (isTriplet && (isBoldOpen == 0) && (isItalicOpen == 0) && !IsWhiteSpaceOrNone(t, i + 3))
+                    {
+                        string cl = FindClosingStars(t, i + 3);
+                        if (cl == "**")
+                        {
+                            app = "[i][b]";
+                            isBoldOpen = 2;
+                            isItalicOpen = 1;
+                        }
+                        else
+                        { 
+                            app = "[b][i]";
+                            isBoldOpen = 1;
+                            isItalicOpen = 2;
+                        }
+
+                        // look ahead for a closing "*"?
+                        nx = i + 3;
+                    }
+                    else if (isTriplet && (isBoldOpen > 0) && (isItalicOpen > 0) && IsWhiteSpaceOrNone(t, i + 3))
+                    {
+                        if (isBoldOpen > isItalicOpen)
+                            app = "[/b][/i]";
+                        else
+                            app = "[/i][/b]";
+                        nx = i + 3;
+                    }
+                    else if (bsw && (isBoldOpen==0) && !IsWhiteSpaceOrNone(t, i + 2))
                     {
                         app = "[b]";
-                        isBoldOpen = true;
+                        isBoldOpen = isItalicOpen + 1;
                     }
-                    else if (bsw && isBoldOpen && !IsWhiteSpaceOrNone(t, i - 1))
+                    else if (bsw && (isBoldOpen != 0) && !IsWhiteSpaceOrNone(t, i - 1))
                     {
                         app = "[/b]";
-                        isBoldOpen = false;
+                        isBoldOpen = 0;
+                        isItalicOpen = (isItalicOpen > 0)? 1: 0;
                     }
-                    else if (isw && !isItalicOpen && !IsWhiteSpaceOrNone(t, i + 1))
+                    else if (isw && (isItalicOpen == 0) && !IsWhiteSpaceOrNone(t, i + 1))
                     {
                         app = "[i]";
-                        isItalicOpen = true;
+                        isItalicOpen = isBoldOpen + 1;
                     }
-                    else if (isw && isItalicOpen && !IsWhiteSpaceOrNone(t, i - 1))
+                    else if (isw && (isItalicOpen != 0) && !IsWhiteSpaceOrNone(t, i - 1))
                     {
                         app = "[/i]";
-                        isItalicOpen = false;
+                        isItalicOpen = 0;
+                        isBoldOpen = (isBoldOpen > 0) ? 1 : 0;
                     }
                     if (!string.IsNullOrEmpty(app))
                     {
